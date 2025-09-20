@@ -30,7 +30,7 @@ fig.add_annotation(
     borderwidth=1
 )
 
-fig.show("browser")
+st.plotly_chart(fig, use_container_width=True)
 
 
 import altair as alt
@@ -71,6 +71,7 @@ st.altair_chart((chart + text).interactive(), use_container_width=True)
 
 # cd  "C:\Users\Sala_\Downloads\rematerialdeclasemarketinganalytics"
 # py -m streamlit run Ejemplo_5_Storytelling.py
+
 
 
 
