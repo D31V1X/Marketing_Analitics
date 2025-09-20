@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import pynarrative as pn
+import altair as alt
 import openpyxl
 import os  # Import necesario para manejar archivos locales
 
@@ -51,40 +51,63 @@ else:
         df["Sales_diff"] = df["Sales"].diff()
         df["Color"] = df["Sales_diff"].apply(lambda x: "green" if x > 0 else ("red" if x < 0 else "gray"))
 
-        # Historia con línea + puntos
-        story = (
-            pn.Story(df, width=700, height=400)
-              .layer(
-                  pn.Layer()  # Línea azul
-                    .mark_line(color="steelblue")
-                    .encode(x="Year:O", y="Sales:Q"),
-                  pn.Layer()  # Puntos coloreados
-                    .mark_point(size=80)
-                    .encode(x="Year:O", y="Sales:Q", color="Color:N")
-              )
-              .add_title("Tendencia de Ventas", "Evolución anual", title_color="#2c3e50")
-              .add_context("Las ventas reflejan el desempeño anual del retail", position="top")
+        # Línea azul
+        line = alt.Chart(df).mark_line(color="steelblue").encode(
+            x=alt.X("Year:O", title="Año"),
+            y=alt.Y("Sales:Q", title="Ventas")
         )
+
+        # Puntos de colores
+        points = alt.Chart(df).mark_point(size=80).encode(
+            x="Year:O",
+            y="Sales:Q",
+            color=alt.Color("Color:N", legend=alt.Legend(title="Tendencia"))
+        )
+
+        # Combinar ambos
+        chart = (line + points).properties(
+            width=700,
+            height=400,
+            title={
+                "text": "Tendencia de Ventas",
+                "subtitle": ["Evolución anual"],
+                "color": "#2c3e50"
+            }
+        )
+
+        st.altair_chart(chart, use_container_width=True)
+        st.markdown("**Las ventas reflejan el desempeño anual del retail**")
 
     elif opcion == "💰 Utilidades":
-        story = (
-            pn.Story(df, width=700, height=400)
-              .mark_bar(color="orange")
-              .encode(x="Year:O", y="Profit:Q")
-              .add_title("Utilidad por Año", "Margen de ganancia", title_color="#8e44ad")
-              .add_context("Las utilidades están influenciadas por costos e inversión en campañas", position="top")
+        chart = alt.Chart(df).mark_bar(color="orange").encode(
+            x=alt.X("Year:O", title="Año"),
+            y=alt.Y("Profit:Q", title="Utilidad")
+        ).properties(
+            width=700,
+            height=400,
+            title={
+                "text": "Utilidad por Año",
+                "subtitle": ["Margen de ganancia"],
+                "color": "#8e44ad"
+            }
         )
+
+        st.altair_chart(chart, use_container_width=True)
+        st.markdown("**Las utilidades están influenciadas por costos e inversión en campañas**")
 
     elif opcion == "👥 Clientes":
-        story = (
-            pn.Story(df, width=700, height=400)
-              .mark_area(color="green", opacity=0.5)
-              .encode(x="Year:O", y="Customers:Q")
-              .add_title("Evolución de Clientes", "2018-2023", title_color="#16a085")
-              .add_context("El número de clientes muestra fidelización y atracción de nuevos compradores", position="top")
+        chart = alt.Chart(df).mark_area(color="green", opacity=0.5).encode(
+            x=alt.X("Year:O", title="Año"),
+            y=alt.Y("Customers:Q", title="Clientes")
+        ).properties(
+            width=700,
+            height=400,
+            title={
+                "text": "Evolución de Clientes",
+                "subtitle": ["2018-2023"],
+                "color": "#16a085"
+            }
         )
 
-    # ===========================
-    # 4. Renderizar historia
-    # ===========================
-    st.altair_chart(story.render(), use_container_width=True)
+        st.altair_chart(chart, use_container_width=True)
+        st.markdown("**El número de clientes muestra fidelización y atracción de nuevos compradores**")
