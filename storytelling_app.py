@@ -40,39 +40,6 @@ ax.set_title("Compras por Segmento")
 st.pyplot(fig2)
 
 # ======================
-# 3. Video corto con Matplotlib Animation
-# ======================
-st.header("🎥 Video Corto con Insights")
-
-ventas = [100, 150, 180, 220, 260]
-meses = ["Ene", "Feb", "Mar", "Abr", "May"]
-
-fig3, ax3 = plt.subplots()
-line, = ax3.plot([], [], 'r-o')
-ax3.set_xlim(0, len(meses)-1)
-ax3.set_ylim(0, max(ventas)+50)
-ax3.set_xticks(range(len(meses)))
-ax3.set_xticklabels(meses)
-
-def init():
-    line.set_data([], [])
-    return line,
-
-def update(frame):
-    line.set_data(range(frame+1), ventas[:frame+1])
-    return line,
-
-ani = animation.FuncAnimation(fig3, update, frames=len(ventas), init_func=init, blit=True)
-
-# Guardar animación como video temporal
-tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
-ani.save(tmpfile.name, writer="ffmpeg")
-
-st.video(tmpfile.name)
-
-
-
-# ======================
 # 3.1 Video corto con Matplotlib Animation
 # ======================
 
