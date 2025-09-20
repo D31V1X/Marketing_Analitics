@@ -43,7 +43,6 @@ opcion = st.radio(
 # ===========================
 # 3. Crear historias
 # ===========================
-
 if "Year" not in df.columns:
     st.error("⚠️ Tu archivo debe tener una columna 'Year'.")
 else:
@@ -52,25 +51,19 @@ else:
         df["Sales_diff"] = df["Sales"].diff()
         df["Color"] = df["Sales_diff"].apply(lambda x: "green" if x > 0 else ("red" if x < 0 else "gray"))
 
-        base = pn.Story(df, width=700, height=400)
-
-        # Línea azul
-        line = (
-            base.mark_line(color="steelblue")
-                .encode(x="Year:O", y="Sales:Q")
-        )
-
-        # Puntos de colores
-        points = (
-            base.mark_point(size=80)
-                .encode(x="Year:O", y="Sales:Q", color="Color:N")
-        )
-
-        # Combinar ambas capas
+        # Historia con línea + puntos
         story = (
-            (line + points)
-            .add_title("Tendencia de Ventas", "Evolución anual", title_color="#2c3e50")
-            .add_context("Las ventas reflejan el desempeño anual del retail", position="top")
+            pn.Story(df, width=700, height=400)
+              .layer(
+                  pn.Layer()  # Línea azul
+                    .mark_line(color="steelblue")
+                    .encode(x="Year:O", y="Sales:Q"),
+                  pn.Layer()  # Puntos coloreados
+                    .mark_point(size=80)
+                    .encode(x="Year:O", y="Sales:Q", color="Color:N")
+              )
+              .add_title("Tendencia de Ventas", "Evolución anual", title_color="#2c3e50")
+              .add_context("Las ventas reflejan el desempeño anual del retail", position="top")
         )
 
     elif opcion == "💰 Utilidades":
