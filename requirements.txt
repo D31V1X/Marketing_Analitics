@@ -3,3 +3,5 @@ pandas
 openpyxl
 pynarrative
 plotly
+seaborn
+matplotlib
