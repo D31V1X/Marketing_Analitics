@@ -48,10 +48,20 @@ if "Year" not in df.columns:
     st.error("⚠️ Tu archivo debe tener una columna 'Year'.")
 else:
     if opcion == "📈 Ventas":
+        # Detectar subidas y caídas
+        df["Sales_diff"] = df["Sales"].diff()
+        df["Color"] = df["Sales_diff"].apply(lambda x: "green" if x > 0 else ("red" if x < 0 else "gray"))
+
         story = (
             pn.Story(df, width=700, height=400)
               .mark_line(color="steelblue")
               .encode(x="Year:O", y="Sales:Q")
+              .mark_point(size=80)  # puntos visibles
+              .encode(
+                  x="Year:O",
+                  y="Sales:Q",
+                  color="Color:N"
+              )
               .add_title("Tendencia de Ventas", "Evolución anual", title_color="#2c3e50")
               .add_context("Las ventas reflejan el desempeño anual del retail", position="top")
         )
