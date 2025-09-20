@@ -5,8 +5,10 @@ Created on Tue Sep  9 23:50:53 2025
 @author: cesar
 """
 
-
-
+import altair as alt
+import pandas as pd
+import streamlit as st
+import plotly
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -33,10 +35,6 @@ fig.add_annotation(
 st.plotly_chart(fig, use_container_width=True)
 
 
-import altair as alt
-import pandas as pd
-import streamlit as st
-import plotly
 
 
 df = pd.DataFrame({
@@ -71,6 +69,7 @@ st.altair_chart((chart + text).interactive(), use_container_width=True)
 
 # cd  "C:\Users\Sala_\Downloads\rematerialdeclasemarketinganalytics"
 # py -m streamlit run Ejemplo_5_Storytelling.py
+
 
 
 
