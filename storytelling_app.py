@@ -71,6 +71,8 @@ ani = animation.FuncAnimation(fig3, update, frames=len(ventas), init_func=init, 
 tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix='.gif')
 ani.save(tmpfile.name, writer="pillow")
 
+# Mostrar en Streamlit
+st.image(tmpfile.name)
 
 # ======================
 # Footer
