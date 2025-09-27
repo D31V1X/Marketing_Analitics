@@ -104,7 +104,29 @@ elif opcion == "👥 Segmentación de Clientes":
     )
 
     st.plotly_chart(fig2, use_container_width=True)
-    st.info("💡 Insight: El segmento Consumer domina en ventas, pero Corporate y Home Office pueden tener mejor margen de rentabilidad. Esto guía campañas más personalizadas.")
+    st.info("1. El segmento Consumer domina tanto en ventas como en rentabilidad
+
+Representa 53.3% de las ventas y 50.7% de la rentabilidad.
+
+Esto confirma que el cliente final (Consumer) es el principal motor del negocio, no solo por volumen, sino también por su aporte directo a las utilidades.
+
+Estrategia: reforzar campañas de fidelización y ofertas dirigidas a este segmento puede maximizar el retorno.
+
+2. Home Office es el segmento con mayor brecha positiva en rentabilidad
+
+En ventas aporta 17.4%, pero en rentabilidad sube a 21%.
+
+Esto indica que, aunque su volumen de compra es más pequeño, sus márgenes son más altos.
+
+Estrategia: vale la pena potenciar este nicho con soluciones especializadas, ya que genera un impacto proporcionalmente mayor en la utilidad.
+
+3. Corporate es menos rentable en proporción a sus ventas
+
+Aporta 29.3% de las ventas, pero solo 28.3% en rentabilidad.
+
+Esto refleja que el segmento corporativo requiere descuentos o tiene menores márgenes.
+
+Estrategia: revisar políticas comerciales, condiciones de crédito y costos asociados para mejorar la rentabilidad de este segmento sin perder volumen.")
 
 # ---------------------------
 # SLIDE 3 – Ventas por Región
