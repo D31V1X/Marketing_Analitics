@@ -17,7 +17,8 @@ df["Ship Date"] = pd.to_datetime(df["Ship Date"])
 
 # Crear la columna Delivery Days (diferencia en días)
 df["Delivery Days"] = (df["Ship Date"] - df["Order Date"]).dt.days
-
+# Crear la columna Year (diferencia en días)
+df["Year"] = df["Order Date"].dt.year
 
 
 # ===========================
@@ -110,8 +111,6 @@ elif opcion == "👥 Segmentación de Clientes":
 # ---------------------------
 
 # --- Columna Year para el filtro ---
-df["Year"] = df["Order Date"].dt.year
-
 elif opcion == "🌎 Ventas por Región":
     # --- Filtro por año ---
     years = df["Year"].unique()
