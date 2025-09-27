@@ -104,7 +104,7 @@ elif opcion == "👥 Segmentación de Clientes":
     )
 
     st.plotly_chart(fig2, use_container_width=True)
-    st.info("1. El segmento Consumer domina tanto en ventas como en rentabilidad
+    st.info("""1. El segmento Consumer domina tanto en ventas como en rentabilidad
 
 Representa 53.3% de las ventas y 50.7% de la rentabilidad.
 
@@ -126,7 +126,7 @@ Aporta 29.3% de las ventas, pero solo 28.3% en rentabilidad.
 
 Esto refleja que el segmento corporativo requiere descuentos o tiene menores márgenes.
 
-Estrategia: revisar políticas comerciales, condiciones de crédito y costos asociados para mejorar la rentabilidad de este segmento sin perder volumen.")
+Estrategia: revisar políticas comerciales, condiciones de crédito y costos asociados para mejorar la rentabilidad de este segmento sin perder volumen.""")
 
 # ---------------------------
 # SLIDE 3 – Ventas por Región
