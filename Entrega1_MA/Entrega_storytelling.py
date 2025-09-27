@@ -2,7 +2,7 @@ url = "https://github.com/D31V1X/Marketing_Analitics/blob/main/Entrega1_MA/super
 df = pd.read_csv(url, encoding="latin1", sep=";", engine="python")
 
 #df = pd.read_csv("/content/superstore.csv", encoding="latin1", sep=";", engine="python")
-!pip install streamlit
+
 
 # ==============================================
 # Storytelling de Ventas y Rentabilidad (Superstore)
