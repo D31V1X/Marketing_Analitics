@@ -75,7 +75,7 @@ if opcion == "📈 Panorama Ventas & Profit":
     )
 
     st.plotly_chart(fig1, use_container_width=True)
-    st.info("💡 Insight: Algunas categorías generan muchas ventas, pero con márgenes de rentabilidad bajos o incluso negativos (ej. Furniture–Tables).")
+    st.info("Indicador: La categoría tecnología, tiene ventas inferiores a muebles en un 46%  pero el profit (Beneficio) de tecnologia es 15 veces superior al de muebles")
 
 # ---------------------------
 # SLIDE 2 – Segmentación de Clientes
