@@ -155,7 +155,7 @@ elif opcion == "🌎 Ventas por Región":
     fig_line.update_traces(mode="lines+markers")
 
     # --- Cálculo: tiempo promedio de entrega por región ---
-region_delivery = (df_year.groupby("Region")["Delivery Days"]
+    region_delivery = (df_year.groupby("Region")["Delivery Days"]
                    .mean()
                    .reset_index())
 
