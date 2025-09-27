@@ -4,3 +4,4 @@ scikit-learn
 gspread
 oauth2client
 openpyxl
+plotly
