@@ -138,21 +138,7 @@ elif opcion == "🌎 Ventas por Región":
     years = df["Year"].unique()
     selected_year = st.selectbox("Selecciona un año", sorted(years))
 
-    # Filtrar por el año elegido
-    df_year = df[df["Year"] == selected_year]
 
-    # --- Línea: tiempo de entrega ---
-    delivery_trend = (df_year.groupby("Order Date")["Delivery Days"]
-                      .mean()
-                      .reset_index())
-
-    fig_line = px.line(
-        delivery_trend,
-        x="Order Date",
-        y="Delivery Days",
-        title=f"Tiempo promedio de entrega ({selected_year})"
-    )
-    fig_line.update_traces(mode="lines+markers")
 
     # --- Cálculo: tiempo promedio de entrega por región ---
     region_delivery = (df_year.groupby("Region")["Delivery Days"]
