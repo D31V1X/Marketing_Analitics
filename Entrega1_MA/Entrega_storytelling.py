@@ -11,7 +11,12 @@ url = "Entrega1_MA/superstore_base.csv"
 df = pd.read_csv(url, encoding="latin1", sep=";", engine="python")
 
 #df = pd.read_csv("/content/superstore.csv", encoding="latin1", sep=";", engine="python")
+# Asegurarse de que las fechas estén en formato datetime
+df["Order Date"] = pd.to_datetime(df["Order Date"])
+df["Ship Date"] = pd.to_datetime(df["Ship Date"])
 
+# Crear la columna Delivery Days (diferencia en días)
+df["Delivery Days"] = (df["Ship Date"] - df["Order Date"]).dt.days
 
 
 
