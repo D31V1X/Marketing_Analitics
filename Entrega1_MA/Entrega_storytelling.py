@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import streamlit as st
 
 
-url = "https://github.com/D31V1X/Marketing_Analitics/blob/main/Entrega1_MA/superstore_base.csv"
+url = "Entrega1_MA/superstore_base.csv"
 df = pd.read_csv(url, encoding="latin1", sep=";", engine="python")
 
 #df = pd.read_csv("/content/superstore.csv", encoding="latin1", sep=";", engine="python")
