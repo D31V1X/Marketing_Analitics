@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
 import streamlit as st
-import plotly.graph_objects as go
+
 
 url = "Entrega1_MA/superstore_base.csv"
 df = pd.read_csv(url, encoding="latin1", sep=";", engine="python")
@@ -138,33 +138,22 @@ elif opcion == "🌎 Ventas por Región":
     years = df["Year"].unique()
     selected_year = st.selectbox("Selecciona un año", sorted(years))
 
+    # Filtrar por el año elegido
+    df_year = df[df["Year"] == selected_year]
 
+    # --- Línea: tiempo de entrega ---
+    delivery_trend = (df_year.groupby("Order Date")["Delivery Days"]
+                      .mean()
+                      .reset_index())
 
-    # --- Cálculo: tiempo promedio de entrega por región ---
-    region_delivery = (df_year.groupby("Region")["Delivery Days"]
-                   .mean()
-                   .reset_index())
-
-    # --- Tarjetas estilo indicadores por región ---
-    fig_cards = go.Figure()
-    
-    for i, row in region_delivery.iterrows():
-        fig_cards.add_trace(go.Indicator(
-            mode="number",
-            value=round(row["Delivery Days"], 1),
-            title={"text": f"{row['Region']}<br>Promedio de días"},
-            domain={'row': 0, 'column': i}
-        ))
-    
-    # Ajustamos el layout en forma de tarjetas horizontales
-    fig_cards.update_layout(
-        grid={'rows': 1, 'columns': len(region_delivery), 'pattern': "independent"},
-        title=f"Tiempo promedio de entrega por región - {selected_year}"
+    fig_line = px.line(
+        delivery_trend,
+        x="Order Date",
+        y="Delivery Days",
+        title=f"Tiempo promedio de entrega ({selected_year})"
     )
-    
-    fig_cards.show()
+    fig_line.update_traces(mode="lines+markers")
 
-    
     # --- Barras: ventas y profit por región ---
     region_summary = (df_year.groupby("Region")[["Sales", "Profit"]]
                       .sum()
