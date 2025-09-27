@@ -1,55 +1,26 @@
-#Chatbot
-import os, re, uuid, importlib
-from datetime import datetime
-
-# ------------------------------
-# Verificación de dependencias
-# ------------------------------
-DEPENDENCIAS = [
-    ("gradio", "gradio"),
-    ("pandas", "pandas"),
-    ("openpyxl", "openpyxl"),
-    ("sklearn", "scikit-learn"),
-]
-_missing = []
-for mod, _pip in DEPENDENCIAS:
-    try:
-        importlib.import_module(mod)
-    except Exception:
-        _missing.append((mod, _pip))
-if _missing:
-    mods = ", ".join(m for m, _ in _missing)
-    pips = " ".join(p for _, p in _missing)
-    raise RuntimeError(
-        f"Faltan dependencias: {mods}. Instálalas en Colab con: !pip install {pips}"
-    )
-
-# ------------------------------
-# Imports confirmados
-# ------------------------------
-import gradio as gr
+# app.py
+import os, re, uuid
 import pandas as pd
+from datetime import datetime
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neighbors import NearestNeighbors
+import streamlit as st
 
 # ------------------------------
-# Archivos Excel
+# Configuración inicial
 # ------------------------------
+st.set_page_config(page_title="Chatbot PQR", page_icon="📨")
 EXCEL_FILE_INTERACCIONES = "interacciones_chatbot.xlsx"
 EXCEL_FILE_RADICADOS = "radicados_pqr.xlsx"
 
-# ------------------------------
-# Validaciones
-# ------------------------------
+# Regex validaciones
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 PHONE_RE = re.compile(r"^[+\d][\d\s-]{6,}$")
 DOC_RE = re.compile(r"^[A-Za-z0-9.-]{4,}$")
-TIPOS_VALIDOS = {
-    "p": "Petición", "peticion": "Petición",
-    "q": "Queja", "queja": "Queja",
-    "r": "Reclamo", "reclamo": "Reclamo",
-    "s": "Sugerencia", "sugerencia": "Sugerencia"
-}
+TIPOS_VALIDOS = {"p":"Petición","peticion":"Petición",
+                 "q":"Queja","queja":"Queja",
+                 "r":"Reclamo","reclamo":"Reclamo",
+                 "s":"Sugerencia","sugerencia":"Sugerencia"}
 
 def is_valid_email(x): return bool(EMAIL_RE.match(x or ""))
 def is_valid_phone(x): return bool(PHONE_RE.match(x or ""))
@@ -65,28 +36,24 @@ def save_interaction(user_msg, bot_response):
         try:
             df_exist = pd.read_excel(EXCEL_FILE_INTERACCIONES)
             df_final = pd.concat([df_exist, df_new], ignore_index=True)
-        except Exception: df_final = df_new
+        except: df_final = df_new
     else: df_final = df_new
-    df_final.to_excel(EXCEL_FILE_INTERACCIONES,index=False)
+    df_final.to_excel(EXCEL_FILE_INTERACCIONES, index=False)
 
 def save_radicado(form):
     rid = f"PQR-{datetime.now():%Y%m%d%H%M%S}-{str(uuid.uuid4())[:6].upper()}"
     row = {
         "radicado": rid, "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "tipo": form.get("tipo"), "nombre": form.get("nombre"), "documento": form.get("documento"),
-        "email": form.get("email"), "telefono": form.get("telefono"),
-        "departamento": form.get("departamento"), "municipio": form.get("municipio"),
-        "canal_respuesta": form.get("canal"), "descripcion": form.get("descripcion"),
-        "autorizacion_datos": form.get("autorizo")
+        **form
     }
     df_new = pd.DataFrame([row])
     if os.path.exists(EXCEL_FILE_RADICADOS):
         try:
             df_exist = pd.read_excel(EXCEL_FILE_RADICADOS)
             df_final = pd.concat([df_exist, df_new], ignore_index=True)
-        except Exception: df_final = df_new
+        except: df_final = df_new
     else: df_final = df_new
-    df_final.to_excel(EXCEL_FILE_RADICADOS,index=False)
+    df_final.to_excel(EXCEL_FILE_RADICADOS, index=False)
     return rid
 
 # ------------------------------
@@ -99,86 +66,96 @@ FAQ_QA = [
 ]
 _vec = TfidfVectorizer()
 X = _vec.fit_transform([q for q,_ in FAQ_QA])
-_nn = NearestNeighbors(n_neighbors=1,metric="cosine").fit(X)
+_nn = NearestNeighbors(n_neighbors=1, metric="cosine").fit(X)
 
-def retrieve_faq(msg,th=0.35):
+def retrieve_faq(msg, th=0.35):
     if not msg.strip(): return None
-    dist,idx = _nn.kneighbors(_vec.transform([msg]))
-    sim = 1-float(dist[0][0])
-    return FAQ_QA[int(idx[0][0])][1] if sim>=th else None
+    dist, idx = _nn.kneighbors(_vec.transform([msg]))
+    sim = 1 - float(dist[0][0])
+    return FAQ_QA[int(idx[0][0])][1] if sim >= th else None
+
+# ------------------------------
+# Estado inicial
+# ------------------------------
+if "chat" not in st.session_state:
+    st.session_state.chat = []
+if "state" not in st.session_state:
+    st.session_state.state = {"step":"welcome","form":{}}
+
+WELCOME = "¡Hola! Soy tu asistente de PQR.\nEscribe P, Q, R o S para empezar."
 
 # ------------------------------
 # Conversación
 # ------------------------------
-INIT_STATE = {"step":"welcome","form":{}}
-WELCOME = ("¡Hola! Soy tu asistente de PQR.\n" "Escribe P, Q, R o S para empezar.")
+def handle_message(user_msg):
+    state = st.session_state.state
+    form = state["form"]
+    step = state["step"]
+    txt, low = (user_msg or ""), (user_msg or "").lower()
 
-def build_summary(f):
-    return (f"**Resumen**\nTipo:{f.get('tipo','-')} Nombre:{f.get('nombre','-')} Documento:{f.get('documento','-')}\n"
-            f"Email:{f.get('email','-')} Tel:{f.get('telefono','-')} Dpto:{f.get('departamento','-')} Mun:{f.get('municipio','-')}\n"
-            f"Canal:{f.get('canal','-')} Autorizo:{f.get('autorizo','-')} Descripción:{f.get('descripcion','-')}")
+    faq = retrieve_faq(txt)
+    bot = ""
 
-def _fmt(u,b): return {"role":"user","content":u},{"role":"assistant","content":b}
-
-def handle_message(user_msg,chat_history,state):
-    txt,low=(user_msg or ""),(user_msg or "").lower()
-    if not state: state=INIT_STATE.copy()
     if low in {"reiniciar","reset","/reset"}:
-        bot="Reiniciado. "+WELCOME
-        u,b=_fmt(txt,bot);chat_history+=[u,b];save_interaction(txt,bot)
-        return chat_history,INIT_STATE.copy()
-    step,form=state.get("step"),state.get("form",{})
-    faq=retrieve_faq(txt)
-    bot=""
-    if step=="welcome":
-        t=TIPOS_VALIDOS.get(low)
+        st.session_state.state = {"step":"welcome","form":{}}
+        return "Reiniciado. " + WELCOME
+
+    if step == "welcome":
+        t = TIPOS_VALIDOS.get(low)
         if not t:
-            bot=(f"{faq}\n\n" if faq else "")+"Indica el tipo: P,Q,R o S."
-            u,b=_fmt(txt,bot);chat_history+=[u,b];save_interaction(txt,bot)
-            return chat_history,state
-        form["tipo"]=t;state["step"]="nombre";bot=f"Tipo {t}. Tu nombre completo?"
-    elif step=="nombre": form["nombre"]=txt;state["step"]="documento";bot="Número de documento?"
-    elif step=="documento":
-        if not is_valid_doc(txt): bot="Documento no válido. Ingresa de nuevo:";state["step"]="documento"
-        else: form["documento"]=txt;state["step"]="email";bot="Correo electrónico?"
-    elif step=="email":
-        if not is_valid_email(txt): bot="Email inválido. Intenta otra vez:";state["step"]="email"
-        else: form["email"]=txt;state["step"]="telefono";bot="Teléfono de contacto?"
-    elif step=="telefono":
-        if not is_valid_phone(txt): bot="Teléfono inválido. Intenta de nuevo:";state["step"]="telefono"
-        else: form["telefono"]=txt;state["step"]="departamento";bot="Departamento?"
-    elif step=="departamento": form["departamento"]=txt;state["step"]="municipio";bot="Municipio?"
-    elif step=="municipio": form["municipio"]=txt;state["step"]="canal";bot="¿Prefieres respuesta por correo o teléfono?"
-    elif step=="canal": form["canal"]=txt;state["step"]="descripcion";bot="Describe tu caso brevemente."
-    elif step=="descripcion": form["descripcion"]=txt;state["step"]="autorizo";bot="¿Autorizas uso de datos (sí/no)?"
-    elif step=="autorizo":
-        form["autorizo"]=txt;state["step"]="confirmar";bot=f"Gracias. Confirma para radicar:\n{build_summary(form)}\nEscribe 'confirmar' o 'reiniciar'."
-    elif step=="confirmar":
+            return (faq + "\n\n" if faq else "") + "Indica el tipo: P,Q,R o S."
+        form["tipo"] = t; state["step"] = "nombre"; bot = f"Tipo {t}. Tu nombre completo?"
+    elif step == "nombre":
+        form["nombre"] = txt; state["step"] = "documento"; bot = "Número de documento?"
+    elif step == "documento":
+        if not is_valid_doc(txt): bot = "Documento no válido. Ingresa de nuevo:"
+        else: form["documento"]=txt; state["step"]="email"; bot="Correo electrónico?"
+    elif step == "email":
+        if not is_valid_email(txt): bot="Email inválido. Intenta otra vez:"
+        else: form["email"]=txt; state["step"]="telefono"; bot="Teléfono de contacto?"
+    elif step == "telefono":
+        if not is_valid_phone(txt): bot="Teléfono inválido. Intenta de nuevo:"
+        else: form["telefono"]=txt; state["step"]="departamento"; bot="Departamento?"
+    elif step == "departamento":
+        form["departamento"]=txt; state["step"]="municipio"; bot="Municipio?"
+    elif step == "municipio":
+        form["municipio"]=txt; state["step"]="canal"; bot="¿Prefieres respuesta por correo o teléfono?"
+    elif step == "canal":
+        form["canal"]=txt; state["step"]="descripcion"; bot="Describe tu caso brevemente."
+    elif step == "descripcion":
+        form["descripcion"]=txt; state["step"]="autorizo"; bot="¿Autorizas uso de datos (sí/no)?"
+    elif step == "autorizo":
+        form["autorizo"]=txt; state["step"]="confirmar"
+        bot = f"Gracias. Confirma para radicar:\n{form}\nEscribe 'confirmar' o 'reiniciar'."
+    elif step == "confirmar":
         if low.startswith("confirmar"):
-            rid=save_radicado(form);bot=f"✅ Radicado generado: {rid}"
-            state=INIT_STATE.copy()
-        else: bot="Debes escribir 'confirmar' para finalizar o 'reiniciar'."
-    else: bot="No entendí."
-    u,b=_fmt(user_msg,bot);chat_history+=[u,b];save_interaction(user_msg,bot);state["form"]=form
-    return chat_history,state
+            rid = save_radicado(form)
+            st.session_state.state = {"step":"welcome","form":{}}
+            bot = f"✅ Radicado generado: {rid}"
+        else: bot = "Debes escribir 'confirmar' para finalizar o 'reiniciar'."
+    else:
+        bot = "No entendí."
+
+    return bot
 
 # ------------------------------
-# UI Gradio
+# Interfaz Streamlit
 # ------------------------------
-with gr.Blocks(title="Chatbot PQR") as demo:
-    gr.Markdown("""# 📨 Chatbot PQR\nRadica tu Petición, Queja, Reclamo o Sugerencia.\nArchivos: interacciones_chatbot.xlsx y radicados_pqr.xlsx""")
-    state=gr.State(INIT_STATE.copy())
-    chat=gr.Chatbot(type="messages")
-    msg=gr.Textbox(label="Tu mensaje")
-    clear_btn=gr.Button("Reiniciar")
-    def _init():
-        hist=[];bot=WELCOME;u,b=_fmt("/init",bot);hist+=[u,b];save_interaction("/init",bot)
-        return hist,INIT_STATE.copy()
-    demo.load(_init,outputs=[chat,state])
-    msg.submit(handle_message,inputs=[msg,chat,state],outputs=[chat,state])
-    def _clear():
-        hist=[];bot="Reiniciado. "+WELCOME;u,b=_fmt("/reset",bot);hist+=[u,b];save_interaction("/reset",bot)
-        return hist,INIT_STATE.copy()
-    clear_btn.click(_clear,outputs=[chat,state])
+st.title("📨 Chatbot PQR")
+st.write("Radica tu Petición, Queja, Reclamo o Sugerencia.")
 
-demo.launch(share=True)
+if not st.session_state.chat:
+    st.session_state.chat.append(("bot", WELCOME))
+
+# Mostrar historial
+for role, msg in st.session_state.chat:
+    with st.chat_message(role):
+        st.markdown(msg)
+
+# Entrada de usuario
+if prompt := st.chat_input("Escribe tu mensaje..."):
+    st.session_state.chat.append(("user", prompt))
+    bot_response = handle_message(prompt)
+    st.session_state.chat.append(("bot", bot_response))
+    save_interaction(prompt, bot_response)
+    st.rerun()
