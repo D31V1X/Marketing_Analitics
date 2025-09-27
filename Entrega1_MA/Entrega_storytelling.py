@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
 import streamlit as st
-
+import plotly.graph_objects as go
 
 url = "Entrega1_MA/superstore_base.csv"
 df = pd.read_csv(url, encoding="latin1", sep=";", engine="python")
