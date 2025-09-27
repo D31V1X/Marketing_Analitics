@@ -108,9 +108,20 @@ elif opcion == "👥 Segmentación de Clientes":
 # ---------------------------
 # SLIDE 3 – Ventas por Región
 # ---------------------------
+
+# --- Columna Year para el filtro ---
+df["Year"] = df["Order Date"].dt.year
+
 elif opcion == "🌎 Ventas por Región":
+    # --- Filtro por año ---
+    years = df["Year"].unique()
+    selected_year = st.selectbox("Selecciona un año", sorted(years))
+
+    # Filtrar por el año elegido
+    df_year = df[df["Year"] == selected_year]
+
     # --- Línea: tiempo de entrega ---
-    delivery_trend = (df.groupby("Order Date")["Delivery Days"]
+    delivery_trend = (df_year.groupby("Order Date")["Delivery Days"]
                       .mean()
                       .reset_index())
 
@@ -118,12 +129,12 @@ elif opcion == "🌎 Ventas por Región":
         delivery_trend,
         x="Order Date",
         y="Delivery Days",
-        title="Tiempo promedio de entrega (Order Date vs Ship Date)"
+        title=f"Tiempo promedio de entrega ({selected_year})"
     )
     fig_line.update_traces(mode="lines+markers")
 
     # --- Barras: ventas y profit por región ---
-    region_summary = (df.groupby("Region")[["Sales", "Profit"]]
+    region_summary = (df_year.groupby("Region")[["Sales", "Profit"]]
                       .sum()
                       .reset_index()
                       .sort_values("Sales", ascending=True))
@@ -143,7 +154,7 @@ elif opcion == "🌎 Ventas por Región":
         orientation="h",
         barmode="group",
         text="Valor",
-        title="Ventas y Rentabilidad por Región"
+        title=f"Ventas y Rentabilidad por Región ({selected_year})"
     )
     fig_bar.update_traces(
         texttemplate="%{text:.2s}",
