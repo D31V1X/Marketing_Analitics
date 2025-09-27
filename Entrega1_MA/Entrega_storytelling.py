@@ -31,7 +31,7 @@ st.title("📊 Storytelling Superstore – Ventas y Rentabilidad")
 # ===========================
 opcion = st.radio(
     "Elige la historia que quieres visualizar:",
-    ["📈 Panorama Ventas & Profit", "👥 Segmentación de Clientes", "🌎 Ventas por Región"]
+    ["📈 Panorama Ventas & Profit", "👥 Segmentación de Clientes", "🌎 Ventas por Región y tiempo promedio de entrega"]
 )
 
 # ===========================
@@ -197,4 +197,4 @@ elif opcion == "🌎 Ventas por Región":
     with col2:
         st.plotly_chart(fig_bar, use_container_width=True)
 
-    st.info("💡 Insight: El Oeste concentra las mayores ventas, mientras que algunas regiones presentan pérdidas o bajo desempeño. Esto orienta estrategias regionales.")
+    st.info("Indicador: El Oeste concentra las mayores ventas, mientras que algunas regiones presentan pérdidas o bajo desempeño. Esto orienta estrategias regionales.")
