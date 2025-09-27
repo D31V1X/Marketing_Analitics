@@ -165,8 +165,8 @@ fig_cards.update_layout(
 
 fig_cards.show()
 
-    # --- Barras: ventas y profit por región ---
-    region_summary = (df_year.groupby("Region")[["Sales", "Profit"]]
+# --- Barras: ventas y profit por región ---
+region_summary = (df_year.groupby("Region")[["Sales", "Profit"]]
                       .sum()
                       .reset_index()
                       .sort_values("Sales", ascending=True))
