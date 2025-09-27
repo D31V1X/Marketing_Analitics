@@ -133,7 +133,7 @@ Estrategia: revisar políticas comerciales, condiciones de crédito y costos aso
 # ---------------------------
 
 # --- Columna Year para el filtro ---
-elif opcion == "🌎 Ventas por Región":
+elif opcion == "🌎 Ventas por Región y tiempo promedio de entrega":
     # --- Filtro por año ---
     years = df["Year"].unique()
     selected_year = st.selectbox("Selecciona un año", sorted(years))
